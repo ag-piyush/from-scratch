@@ -216,3 +216,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ML artifacts (keep results as small images/CSVs committed explicitly instead)
+data/
+datasets/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+runs/
+wandb/
+outputs/
+videos/
+*.npz
+.DS_Store

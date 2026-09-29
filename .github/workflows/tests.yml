@@ -1,0 +1,36 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      # CPU-only PyTorch keeps CI fast; the tests compare against references on CPU.
+      - name: Install dependencies
+        run: |
+          uv venv
+          uv pip install --torch-backend cpu -r pyproject.toml --group dev
+
+      - name: Run tests
+        run: |
+          set +e
+          uv run --no-sync pytest
+          code=$?
+          if [ "$code" -eq 5 ]; then
+            echo "No tests collected yet."
+            exit 0
+          fi
+          exit "$code"
