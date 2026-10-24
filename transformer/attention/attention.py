@@ -26,7 +26,10 @@ def attention(q, k, v, causal=True):
 class CausalSelfAttention(nn.Module):
     def __init__(self, d_model, n_heads):
         super().__init__()
-        raise NotImplementedError
+        assert d_model % n_heads == 0 #d_model must be divisible by n_heads
+        self.n_heads = n_heads
+        self.c_attn = nn.Linear(d_model, 3*d_model) # x -> q, k, v side by side
+        self.c_proj = nn.Linear(d_model, d_model) # project back to d_model
 
     def forward(self, x): #x: (B, T, C)
         raise NotImplementedError
