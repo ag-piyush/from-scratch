@@ -12,7 +12,7 @@ Every component here is written from a blank file in PyTorch and comes with a te
 
 | Component | Folder | Checked against | Status |
 |---|---|---|---|
-| Causal multi-head attention | `transformer/attention` | `F.scaled_dot_product_attention` (causal mask) | 🚧 in progress |
+| Causal multi-head attention | `transformer/attention` | `F.scaled_dot_product_attention` (causal mask) | ✅ done |
 
 ## Layout
 
