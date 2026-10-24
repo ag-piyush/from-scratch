@@ -231,3 +231,5 @@ outputs/
 videos/
 *.npz
 .DS_Store
+
+scratch.py
