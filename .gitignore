@@ -232,4 +232,7 @@ videos/
 *.npz
 .DS_Store
 
-scratch.py
+scratch_*.py
+
+
+data/
