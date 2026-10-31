@@ -8,6 +8,14 @@
 uv run pytest transformer/gpt
 ```
 
+**Data:** tiny Shakespeare, about 1.1 MB of plain ASCII text (1,115,394 characters, 65 unique), from Karpathy's [char-rnn](https://github.com/karpathy/char-rnn). The tests don't need it; only the training run does. Download it into the git-ignored `data/` folder at the repo root:
+
+```bash
+mkdir -p data
+curl -L -o data/input.txt https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
+wc -c data/input.txt   # 1115394
+```
+
 **Result:** <!-- TODO after the M4 run: val loss vs the baselines (uniform 4.174, unigram 3.347, bigram 2.482, trigram 2.046), step count, wall-clock on the M4, and a loss-curve image or a 300-character sample -->
 
 **Gotcha:** <!-- TODO: one bug you hit or detail that surprised you, and why it happens -->
