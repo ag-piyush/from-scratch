@@ -53,14 +53,53 @@ class GPT(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        # 3a: self.transformer = nn.ModuleDict(dict(wte=..., wpe=..., h=..., ln_f=...))
-        # 3a: self.lm_head = ..., tied to wte
-        # 3b: init
+        C = config.n_embd
+        self.transformer = nn.ModuleDict(dict(
+            wte = nn.Embedding(config.vocab_size, C),   # (V, C)
+            wpe = nn.Embedding(config.block_size, C),   # (block_size, C)
+            h = nn.ModuleList([Block(C, config.n_head, config.dropout) for _ in range(config.n_layer)]),
+            ln_f = nn.LayerNorm(C),
+        ))
+        self.lm_head = nn.Linear(C, config.vocab_size, bias=False)  # weight: (V, C)
+        self.lm_head.weight = self.transformer.wte.weight           # tie: same tensor
+        self.apply(self._init_weights)
+        resid_std = 0.02 / math.sqrt(2 * config.n_layer)
+        for name, p in self.named_parameters():
+            if name.endswith(("attn.c_proj.weight", "mlp.c_proj.weight")):
+                nn.init.normal_(p, mean=0.0, std=resid_std)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, idx, targets=None):   # idx: (B, T) long
-        ...
+        B, T = idx.shape
+        assert T <= self.config.block_size, f"sequence length {T} > block_size {self.config.block_size}"
+
+        pos = torch.arange(T, device=idx.device)                    # (T,)
+        x = self.transformer.wte(idx) + self.transformer.wpe(pos)   # (B, T, C) + (T, C) -> (B, T, C)
+        for block in self.transformer.h:
+            x = block(x)                                            # (B, T, C)
+        x = self.transformer.ln_f(x)                                # (B, T, C)
+        logits = self.lm_head(x)                                    # (B, T, V)
+
+        loss = None
+        if targets is not None:
+            V = logits.size(-1)
+            loss = F.cross_entropy(logits.reshape(B * T, V), targets.reshape(B * T))
         return logits, loss
 
     @torch.no_grad()
-    def generate(self, idx, max_new_tokens):
-        ...
+    def generate(self, idx, max_new_tokens):   # idx: (B, T) long
+        for _ in range(max_new_tokens):
+            idx_cond = idx[:, -self.config.block_size:]           # (B, ≤ block_size)
+            logits, _ = self(idx_cond)                            # (B, T', V)
+            logits = logits[:, -1, :]                             # (B, V)
+            probs = F.softmax(logits, dim=-1)                     # (B, V)
+            next_id = torch.multinomial(probs, num_samples=1)     # (B, 1)
+            idx = torch.cat([idx, next_id], dim=1)                # (B, T + 1)
+        return idx
