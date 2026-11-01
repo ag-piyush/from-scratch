@@ -13,7 +13,7 @@ Every component here is written from a blank file in PyTorch and comes with a te
 | Component | Folder | Checked against | Status |
 |---|---|---|---|
 | Causal multi-head attention | `transformer/attention` | `F.scaled_dot_product_attention` (causal mask) | ✅ done |
-| Tiny char-level GPT | `transformer/gpt` | `nn.TransformerEncoderLayer` (pre-norm, causal mask), loss at init = ln(V), overfit one batch | 🚧 in progress |
+| Tiny char-level GPT | `transformer/gpt` | `nn.TransformerEncoderLayer` (pre-norm, causal mask), loss at init = ln(V), overfit one batch | ✅ done |
 
 ## Layout
 
@@ -32,9 +32,10 @@ Each component lives in `<topic>/<component>/` with its implementation, a `test_
 Requires [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync                               # install dependencies
-uv run pytest                         # run every test
-uv run pytest transformer/attention   # run one component's tests
+uv sync                                  # install dependencies
+uv run pytest                            # run every test
+uv run pytest transformer/attention      # run one component's tests
+uv run python -m transformer.gpt.train   # train the tiny GPT (needs the dataset; see transformer/gpt/README.md)
 ```
 
 Tests run on CPU in CI for every push. Tests import by path from the repo root, e.g. `from transformer.attention.attention import ...`.
