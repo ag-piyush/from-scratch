@@ -4,7 +4,7 @@
 
 From-scratch building blocks of modern ML: transformers and LLMs, deep and offline RL, post-training and GPU kernels, each checked against a reference.
 
-Every component here is written from a blank file in PyTorch and comes with a test that compares it against a reference implementation or a published result. Each folder has a short README covering what it is, what it's checked against, one result, and one gotcha hit along the way.
+Every component here is written from a blank file in PyTorch or NumPy and comes with a test that compares it against a reference implementation or a published result. Each folder has a short README covering what it is, what it's checked against, one result, and one gotcha hit along the way.
 
 ## Index
 
@@ -14,13 +14,14 @@ Every component here is written from a blank file in PyTorch and comes with a te
 |---|---|---|---|
 | Causal multi-head attention | `transformer/attention` | `F.scaled_dot_product_attention` (causal mask) | ✅ done |
 | Tiny char-level GPT | `transformer/gpt` | `nn.TransformerEncoderLayer` (pre-norm, causal mask), loss at init = ln(V), overfit one batch | ✅ done |
+| Tabular policy evaluation (linear solve + Monte Carlo) | `rl/tabular` | Sutton & Barto Figure 3.2, a hand-solved 3-state MDP, the Bellman equation, Monte Carlo vs the linear solve | ✅ done |
 
 ## Layout
 
 ```
 transformer/     attention, GPT, sampling and decoding, KV cache
 tokenization/    BPE
-rl/              DQN, PPO, IQL, Decision Transformer
+rl/              tabular policy evaluation (DP and TD next), DQN, PPO, IQL, Decision Transformer
 post_training/   GRPO objective, LoRA
 gpu_kernels/     Triton kernels
 ```
