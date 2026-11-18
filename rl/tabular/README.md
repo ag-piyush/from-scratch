@@ -13,3 +13,21 @@ uv run pytest rl/tabular
 **Gotcha:** I dropped γ from `I − γ·P_π`, which solves the γ = 1 case. Every row of P_π sums to 1, so (I − P_π)·**1** = 0 and the matrix is singular. numpy raised `LinAlgError` on the tiny MDP, where the absorbing state's row is exactly zero, but on the gridworld it quietly returned values around −5.9 × 10¹⁴, because rounding hides the zero pivot. The Bellman-residual test caught it: a solve that runs without an error isn't proof it's right.
 
 **References:** Sutton & Barto, *Reinforcement Learning: An Introduction*, 2nd ed. (2018), §3.5–3.6 and Example 3.5 ([PDF](http://incompleteideas.net/book/RLbook2020.pdf)); §5.1 for Monte Carlo prediction.
+
+## Bellman operators (#8, M2)
+ 
+**What it is:** the three Bellman operators as array functions. `q_from_v` does one step of lookahead from any value vector v, `T_pi` averages that lookahead under a policy, and `T_star` takes the best action. Policy evaluation, policy iteration and value iteration (M3–M4) are repeated applications of these.
+ 
+**Checked against:** hand-computed q, T_π v and T\* v on the 3-state MDP (leaky exit, v = [1, 2, 3]); v_π from `policy_eval_linear` (Figure 3.2) and v\* (Figure 3.5) as fixed points; the matrix form T_π v = r_π + γ·P_π v; one-hot probes on a random MDP with S = A, so swapped axes can't hide behind matching shapes; monotonicity; and a contraction check over 2,000 random pairs per operator and γ.
+ 
+```bash
+uv run pytest rl/tabular/test_operators.py
+uv run pytest rl/tabular/test_operators.py -k contraction -s
+```
+ 
+**Result:** _To fill in after the run: how many of the 40 tests pass, the worst ratio the contraction check printed for `T_pi` and `T_star` at γ = 0.9, and your prediction next to what printed._
+ 
+**Gotcha:** _To fill in: one bug you hit or one thing that surprised you, and why it happens._
+ 
+**References:** Sutton & Barto, 2nd ed. (2018), §3.6 (v*, Figure 3.5) and §4.1–4.4 ([PDF](http://incompleteideas.net/book/RLbook2020.pdf)).
+ 
