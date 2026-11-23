@@ -14,7 +14,7 @@ uv run pytest rl/tabular
 
 **References:** Sutton & Barto, *Reinforcement Learning: An Introduction*, 2nd ed. (2018), §3.5–3.6 and Example 3.5 ([PDF](http://incompleteideas.net/book/RLbook2020.pdf)); §5.1 for Monte Carlo prediction.
 
-## Bellman operators (#8, M2)
+## Bellman operators
 
 **What it is:** the three Bellman operators as array functions. `q_from_v` does one step of lookahead from any value vector v, `T_pi` averages that lookahead under a policy, and `T_star` takes the best action. Policy evaluation, policy iteration and value iteration (M3–M4) are repeated applications of these.
 
