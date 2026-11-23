@@ -15,6 +15,7 @@ Every component here is written from a blank file in PyTorch or NumPy and comes 
 | Causal multi-head attention | `transformer/attention` | `F.scaled_dot_product_attention` (causal mask) | ✅ done |
 | Tiny char-level GPT | `transformer/gpt` | `nn.TransformerEncoderLayer` (pre-norm, causal mask), loss at init = ln(V), overfit one batch | ✅ done |
 | Tabular policy evaluation (linear solve + Monte Carlo) | `rl/tabular` | Sutton & Barto Figure 3.2, a hand-solved 3-state MDP, the Bellman equation, Monte Carlo vs the linear solve | ✅ done |
+| Bellman operators (q from v, T_π, T\*) | `rl/tabular` | Hand-computed values on a 3-state MDP, v_π (Figure 3.2) and v\* (Figure 3.5) as fixed points, the matrix form r_π + γP_π v, a contraction check | ✅ done |
 
 ## Layout
 
