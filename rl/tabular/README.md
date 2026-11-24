@@ -30,3 +30,20 @@ uv run pytest rl/tabular/test_operators.py -k contraction -s
 **Gotcha:** my first `q_from_v` looped `p[s] * v[s]` over s, using s for both the current state (the first axis of `p`) and the next state (the index of `v`). That sums down the columns of each P_a, giving vᵀP_a, the v-weighted flow *into* each state, not the lookahead P_a·v, and its shape is (A, S): a broadcast error on the gridworld, but an S = A MDP runs it without complaint. The fix is `R + gamma * (p @ v)`: with a 3-D array on the left, `@` sums over the last axis, which is s′. Second slip, in `T_pi`: `q.transpose(-2, -1)` is PyTorch's swap-two-dims call, but NumPy's `transpose(*axes)` takes a full ordering of the axes, so on a 2-D array it does nothing.
 
 **References:** Sutton & Barto, 2nd ed. (2018), §3.6 (v*, Figure 3.5) and §4.1–4.4 ([PDF](http://incompleteideas.net/book/RLbook2020.pdf)).
+
+## Iterative policy evaluation and policy iteration
+ 
+**What it is:** <one or two lines, in your words: what `policy_eval_iterative` and `policy_iteration` do, and how `greedy_policy` links them>
+ 
+**Checked against:** sweep counts on the 3-state MDP worked out by hand (two-array vs in-place, and the order states are visited in); the stopping bound γ/(1 − γ)·tol against `policy_eval_linear`, on Figure 3.2 and a random MDP; the policy improvement theorem on random deterministic policies; v\* from Figure 3.5; and brute force over all 81 deterministic policies of a random 4-state, 3-action MDP.
+ 
+```bash
+uv run pytest rl/tabular/test_dp.py
+uv run pytest rl/tabular/test_dp.py -k "sweep_counts or policy_iteration_gridworld" -s
+```
+ 
+**Result:** <x/52 pass (y/148 for the folder). Figure 3.2 sweep counts, two-array vs in-place, and how close each error came to its bound. Evaluations policy iteration needed from "always north". Prediction vs outcome for at least one of these>
+ 
+**Gotcha:** <one bug you hit or detail that surprised you, and why it happens>
+ 
+**References:** Sutton & Barto, 2nd ed. (2018), §4.1–4.3 ([PDF](http://incompleteideas.net/book/RLbook2020.pdf)).
