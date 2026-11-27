@@ -33,7 +33,7 @@ uv run pytest rl/tabular/test_operators.py -k contraction -s
 
 ## Iterative policy evaluation and policy iteration
  
-**What it is:** <one or two lines, in your words: what `policy_eval_iterative` and `policy_iteration` do, and how `greedy_policy` links them>
+**What it is:** dynamic programming on the same arrays. `policy_eval_iterative` sweeps T_π until a sweep's largest change drops below tol, either two-array (each sweep is one application of T_π) or in-place (each state reads values already updated in the same sweep). `greedy_policy` turns q into a one-hot policy and keeps the current action unless another beats it by more than tol. `policy_iteration` alternates exact evaluation with that greedy step until the policy stops changing. Value iteration (M4) comes next in this file.
  
 **Checked against:** sweep counts on the 3-state MDP worked out by hand (two-array vs in-place, and the order states are visited in); the stopping bound γ/(1 − γ)·tol against `policy_eval_linear`, on Figure 3.2 and a random MDP; the policy improvement theorem on random deterministic policies; v\* from Figure 3.5; and brute force over all 81 deterministic policies of a random 4-state, 3-action MDP.
  
@@ -42,8 +42,8 @@ uv run pytest rl/tabular/test_dp.py
 uv run pytest rl/tabular/test_dp.py -k "sweep_counts or policy_iteration_gridworld" -s
 ```
  
-**Result:** <x/52 pass (y/148 for the folder). Figure 3.2 sweep counts, two-array vs in-place, and how close each error came to its bound. Evaluations policy iteration needed from "always north". Prediction vs outcome for at least one of these>
+**Result:** 52/52 pass (148/148 for the folder). Figure 3.2 at tol = 1e-8: two-array takes 134 sweeps and in-place 94, with errors against the linear solve of 8.3e-8 (0.92 × the bound γ/(1 − γ)·tol = 9e-8) and 4.2e-8 (0.47 ×). The two-array error sits near the bound because the error that survives longest is a constant shift: rows of P_π sum to 1, so averaging leaves it alone and it shrinks by exactly γ per sweep, like a self-loop. Policy iteration from "always north" reaches Figure 3.5's v\* in 3 evaluations, out of 4²⁵ ≈ 10¹⁵ deterministic policies. On the tiny MDP, π_go reports 3 sweeps although v is exact after 2: the last sweep only confirms. π_stay at tol = 1e-6 stops after 133 sweeps with V(A) 8.2e-6 short of 10, about 8 × tol, because tol limits the last change, not the error. Bound vs outcome: contraction from Δ₁ = 10 allows up to 198 sweeps on Figure 3.2. The run needed 134, because the slowly shrinking part of the error starts much smaller than 10.
  
-**Gotcha:** <one bug you hit or detail that surprised you, and why it happens>
+**Gotcha:** my first `policy_eval_iterative` called `ops.T_pi(p, R, pi, gamma, v)`, swapping v and γ. Inside `q_from_v`, `p @ v` became `p @ 0.9`, and `@` refuses a 0-d operand (`ValueError: matmul: Input operand 1 does not have enough dimensions`). That was lucky: with `*` instead of `@`, the swap would have broadcast silently. Passing `gamma=gamma` by keyword rules it out. I had also left out the `raise` after the loop, so running out of sweeps returned `None`. The max-sweeps test caught it.
  
 **References:** Sutton & Barto, 2nd ed. (2018), §4.1–4.3 ([PDF](http://incompleteideas.net/book/RLbook2020.pdf)).
