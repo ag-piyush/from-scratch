@@ -371,6 +371,8 @@ def test_policy_eval_iterative_does_not_modify_its_inputs(in_place):
 
 def test_policy_eval_iterative_raises_when_it_runs_out_of_sweeps():
     p, R = gw.make_gridworld()
+    # With enough sweeps it converges (and an unfinished NotImplementedError body can't pass).
+    dp.policy_eval_iterative(p, R, uniform_pi(), 0.99, 1e-12, max_sweeps=10_000)
     with pytest.raises(RuntimeError):
         dp.policy_eval_iterative(p, R, uniform_pi(), 0.99, 1e-12, max_sweeps=5)
 
